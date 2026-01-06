@@ -55,15 +55,26 @@ const Navbar = ({ isConnected }) => {
 // ============================================
 const StatusBanner = ({ posisi, status_hujan }) => {
   const isRaining = status_hujan === 'Hujan';
+  const isCloudy = status_hujan === 'Mendung';
   const isOutside = posisi === 'Di Luar';
 
   const getStatus = () => {
+    // Prioritas: Hujan > Mendung > Cerah (Di Luar) > Standby
     if (isRaining) {
       return {
         gradient: 'from-red-500 to-rose-600',
         icon: CloudRain,
         title: 'Hujan Terdeteksi!',
         subtitle: 'Servo menutup atap - Jemuran diamankan'
+      };
+    }
+    // NEW: Status Mendung
+    if (isCloudy) {
+      return {
+        gradient: 'from-slate-500 to-gray-600',
+        icon: Cloud,
+        title: 'Cuaca Mendung',
+        subtitle: 'Cahaya minim, atap menutup antisipasi hujan'
       };
     }
     if (isOutside) {
@@ -129,11 +140,15 @@ const SensorCard = ({ icon: Icon, title, value, unit, iconBg, iconColor }) => {
 };
 
 // ============================================
-// TEMPERATURE CHART
+// TEMPERATURE CHART (Dynamic Colors)
 // ============================================
 const TemperatureChart = ({ currentTemp }) => {
   const { isDark } = useTheme();
   const [history, setHistory] = useState([]);
+  
+  // Temperature threshold
+  const TEMP_THRESHOLD = 27;
+  const isHot = (currentTemp ?? 0) >= TEMP_THRESHOLD;
 
   useEffect(() => {
     if (currentTemp !== undefined && currentTemp !== null) {
@@ -148,6 +163,16 @@ const TemperatureChart = ({ currentTemp }) => {
     }
   }, [currentTemp]);
 
+  // Dynamic colors based on temperature
+  const chartColor = isHot ? '#f43f5e' : '#0ea5e9'; // Rose or Sky
+  const badgeClass = isHot 
+    ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400'
+    : 'bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400';
+  const tempClass = isHot 
+    ? 'text-rose-600 dark:text-rose-400'
+    : 'text-sky-600 dark:text-sky-400';
+  const gradientId = isHot ? 'tempGradHot' : 'tempGradCold';
+
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-slate-800 mb-4">
       <div className="flex items-center justify-between mb-4">
@@ -155,11 +180,18 @@ const TemperatureChart = ({ currentTemp }) => {
           <h3 className="text-base font-semibold text-gray-800 dark:text-slate-100">Temperature Trends</h3>
           <p className="text-xs text-gray-500 dark:text-slate-400">Real-time monitoring</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-900/20">
-          <Thermometer className="w-4 h-4 text-rose-500" />
-          <span className="text-lg font-bold text-rose-600 dark:text-rose-400 tabular-nums">
-            {currentTemp?.toFixed(1) ?? '--'}°C
-          </span>
+        <div className="flex items-center gap-3">
+          {/* Status Badge */}
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}`}>
+            <Thermometer className="w-3.5 h-3.5" />
+            {isHot ? 'Panas' : 'Dingin'}
+          </div>
+          {/* Temperature Value */}
+          <div className="flex items-center gap-1">
+            <span className={`text-lg font-bold tabular-nums ${tempClass}`}>
+              {currentTemp?.toFixed(1) ?? '--'}°C
+            </span>
+          </div>
         </div>
       </div>
       
@@ -167,9 +199,13 @@ const TemperatureChart = ({ currentTemp }) => {
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={history.length > 0 ? history : [{ value: currentTemp || 25, time: 'Now' }]}>
             <defs>
-              <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
+              <linearGradient id="tempGradHot" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0.05} />
+              </linearGradient>
+              <linearGradient id="tempGradCold" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.05} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#334155' : '#e5e7eb'} vertical={false} />
@@ -196,12 +232,24 @@ const TemperatureChart = ({ currentTemp }) => {
             <Area 
               type="monotone" 
               dataKey="value" 
-              stroke="#f43f5e" 
-              strokeWidth={2} 
-              fill="url(#tempGrad)" 
+              stroke={chartColor}
+              strokeWidth={3} 
+              fill={`url(#${gradientId})`} 
             />
           </AreaChart>
         </ResponsiveContainer>
+      </div>
+      
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-6 mt-3 text-xs text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-sky-500" />
+          <span>Dingin (&lt; 27°C)</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+          <span>Panas (≥ 27°C)</span>
+        </div>
       </div>
     </div>
   );
