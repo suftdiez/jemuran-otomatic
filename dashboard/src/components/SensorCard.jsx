@@ -23,6 +23,13 @@ const SensorCard = ({ icon: Icon, label, value, unit, color, subtext }) => {
       iconGlow: 'bg-rose-500',
       text: 'text-rose-600',
       value: 'text-rose-800'
+    },
+    // NEW: Slate color for Mendung
+    slate: {
+      iconBg: 'from-slate-500 to-gray-600',
+      iconGlow: 'bg-slate-500',
+      text: 'text-slate-600',
+      value: 'text-slate-800'
     }
   };
 

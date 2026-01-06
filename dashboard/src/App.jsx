@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  Sun, Moon, Wifi, CloudRain, Home, Thermometer, 
+  Sun, Moon, Wifi, CloudRain, Cloud, Home, Thermometer, 
   Droplets, Lightbulb, RotateCcw, Loader2, Check, 
   AlertCircle, Shirt
 } from 'lucide-react';
@@ -337,11 +337,25 @@ const Dashboard = () => {
           {/* Sensor Grid - 4 Columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <SensorCard
-              icon={data?.status_hujan === 'Hujan' ? CloudRain : Sun}
+              icon={
+                data?.status_hujan === 'Hujan' ? CloudRain : 
+                data?.status_hujan === 'Mendung' ? Cloud : Sun
+              }
               title="Cuaca"
-              value={data?.status_hujan === 'Hujan' ? 'Hujan' : 'Cerah'}
-              iconBg={data?.status_hujan === 'Hujan' ? 'bg-rose-100 dark:bg-rose-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}
-              iconColor={data?.status_hujan === 'Hujan' ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}
+              value={
+                data?.status_hujan === 'Hujan' ? 'Hujan' : 
+                data?.status_hujan === 'Mendung' ? 'Mendung' : 'Cerah'
+              }
+              iconBg={
+                data?.status_hujan === 'Hujan' ? 'bg-rose-100 dark:bg-rose-900/30' : 
+                data?.status_hujan === 'Mendung' ? 'bg-slate-100 dark:bg-slate-800/30' : 
+                'bg-amber-100 dark:bg-amber-900/30'
+              }
+              iconColor={
+                data?.status_hujan === 'Hujan' ? 'text-rose-600 dark:text-rose-400' : 
+                data?.status_hujan === 'Mendung' ? 'text-slate-600 dark:text-slate-400' : 
+                'text-amber-600 dark:text-amber-400'
+              }
             />
             <SensorCard
               icon={Home}

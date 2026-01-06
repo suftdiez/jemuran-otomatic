@@ -1,10 +1,12 @@
-import { CloudRain, Sun, Home } from 'lucide-react';
+import { CloudRain, Cloud, Sun, Home } from 'lucide-react';
 
 const StatusBanner = ({ posisi, status_hujan }) => {
   const isRaining = status_hujan === 'Hujan';
+  const isCloudy = status_hujan === 'Mendung';
   const isOutside = posisi === 'Di Luar';
 
   const getStatus = () => {
+    // Prioritas: Hujan > Mendung > Cerah (Di Luar) > Standby
     if (isRaining) {
       return {
         bg: 'bg-rose-50 dark:bg-rose-900/20',
@@ -15,6 +17,20 @@ const StatusBanner = ({ posisi, status_hujan }) => {
         iconColor: 'text-rose-600 dark:text-rose-400',
         title: 'Hujan Terdeteksi',
         subtitle: 'Jemuran diamankan ke dalam ruangan'
+      };
+    }
+
+    // NEW: Status Mendung
+    if (isCloudy) {
+      return {
+        bg: 'bg-slate-100 dark:bg-slate-800/40',
+        border: 'border-slate-300 dark:border-slate-700',
+        text: 'text-slate-700 dark:text-slate-300',
+        icon: Cloud,
+        iconBg: 'bg-slate-200 dark:bg-slate-700/60',
+        iconColor: 'text-slate-600 dark:text-slate-400',
+        title: 'Cuaca Mendung',
+        subtitle: 'Cahaya minim, atap menutup antisipasi hujan'
       };
     }
     
